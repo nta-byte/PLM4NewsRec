@@ -11,6 +11,7 @@ def get_domain(url):
     domain = urlparse(url).netloc
     return domain
 
+
 def read_news_bert(news_path, args, tokenizer, mode='train'):
     news = {}
     categories = []
@@ -23,28 +24,28 @@ def read_news_bert(news_path, args, tokenizer, mode='train'):
         for line in tqdm(f):
             splited = line.strip('\n').split('\t')
             doc_id, category, subcategory, title, abstract, body, _, _ = splited
-            url=""
+            url = ""
             news_index[doc_id] = index
             index += 1
 
             if 'title' in args.news_attributes:
                 title = title.lower()
                 title = tokenizer(title, max_length=args.num_words_title, \
-                pad_to_max_length=True, truncation=True)
+                                  pad_to_max_length=True, truncation=True)
             else:
                 title = []
 
             if 'abstract' in args.news_attributes:
                 abstract = abstract.lower()
                 abstract = tokenizer(abstract, max_length=args.num_words_abstract, \
-                pad_to_max_length=True, truncation=True)
+                                     pad_to_max_length=True, truncation=True)
             else:
                 abstract = []
 
             if 'body' in args.news_attributes:
                 body = body.lower()[:2000]
                 body = tokenizer(body, max_length=args.num_words_body, \
-                pad_to_max_length=True, truncation=True)
+                                 pad_to_max_length=True, truncation=True)
             else:
                 body = []
 
@@ -52,7 +53,7 @@ def read_news_bert(news_path, args, tokenizer, mode='train'):
                 categories.append(category)
             else:
                 category = None
-            
+
             if 'subcategory' in args.news_attributes:
                 subcategories.append(subcategory)
             else:
@@ -94,6 +95,7 @@ def read_news_bert(news_path, args, tokenizer, mode='train'):
     else:
         assert False, 'Wrong mode!'
 
+
 def read_news(news_path, args, mode='train'):
     news = {}
     categories = []
@@ -133,7 +135,7 @@ def read_news(news_path, args, mode='train'):
                 categories.append(category)
             else:
                 category = None
-            
+
             if 'subcategory' in args.news_attributes:
                 subcategories.append(subcategory)
             else:
@@ -238,14 +240,15 @@ def get_doc_input(news, news_index, category_dict, word_dict, domain_dict,
 
         if 'category' in args.news_attributes:
             news_category[doc_index, 0] = category_dict[category] if category in category_dict else 0
-        
+
         if 'subcategory' in args.news_attributes:
             news_subcategory[doc_index, 0] = subcategory_dict[subcategory] if subcategory in subcategory_dict else 0
-        
+
         if 'domain' in args.news_attributes:
             news_domain[doc_index, 0] = domain_dict[domain] if domain in domain_dict else 0
 
     return news_title, news_abstract, news_body, news_category, news_domain, news_subcategory
+
 
 def get_doc_input_bert(news, news_index, category_dict, domain_dict, subcategory_dict, args):
     news_num = len(news) + 1
@@ -298,7 +301,7 @@ def get_doc_input_bert(news, news_index, category_dict, domain_dict, subcategory
         if 'title' in args.news_attributes:
             news_title[doc_index] = title['input_ids']
             news_title_type[doc_index] = title['token_type_ids']
-            news_title_attmask[doc_index] = title['attention_mask']          
+            news_title_attmask[doc_index] = title['attention_mask']
 
         if 'abstract' in args.news_attributes:
             news_abstract[doc_index] = abstract['input_ids']
@@ -312,10 +315,10 @@ def get_doc_input_bert(news, news_index, category_dict, domain_dict, subcategory
 
         if 'category' in args.news_attributes:
             news_category[doc_index, 0] = category_dict[category] if category in category_dict else 0
-        
+
         if 'subcategory' in args.news_attributes:
             news_subcategory[doc_index, 0] = subcategory_dict[subcategory] if subcategory in subcategory_dict else 0
-        
+
         if 'domain' in args.news_attributes:
             news_domain[doc_index, 0] = domain_dict[domain] if domain in domain_dict else 0
 
@@ -324,8 +327,10 @@ def get_doc_input_bert(news, news_index, category_dict, domain_dict, subcategory
            news_body, news_body_type, news_body_attmask, \
            news_category, news_domain, news_subcategory
 
+
 if __name__ == "__main__":
     from parameters import parse_args
+
     args = parse_args()
     args.news_attributes = ['title', 'body', 'category', 'subcategory', 'domain']
     news, news_index, category_dict, word_dict, domain_dict, subcategory_dict = read_news(

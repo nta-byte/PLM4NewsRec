@@ -11,6 +11,7 @@ class AdditiveAttention(nn.Module):
     Arg: 
         d_h: the last dimension of input
     '''
+
     def __init__(self, d_h, hidden_size=200):
         super(AdditiveAttention, self).__init__()
         self.att_fc1 = nn.Linear(d_h, hidden_size)
@@ -89,15 +90,15 @@ class MultiHeadAttention(nn.Module):
                                self.d_v).transpose(1, 2)
 
         if mask is not None:
-            mask = mask.unsqueeze(1).expand(batch_size, seq_len, seq_len) #  [bz, seq_len, seq_len]
-            mask = mask.unsqueeze(1).repeat(1, self.n_heads, 1, 1) # attn_mask : [bz, 20, seq_len, seq_len]
+            mask = mask.unsqueeze(1).expand(batch_size, seq_len, seq_len)  # [bz, seq_len, seq_len]
+            mask = mask.unsqueeze(1).repeat(1, self.n_heads, 1, 1)  # attn_mask : [bz, 20, seq_len, seq_len]
 
         context, attn = ScaledDotProductAttention(self.d_k)(
             q_s, k_s, v_s, mask)  # [bz, 20, seq_len, 20]
         context = context.transpose(1, 2).contiguous().view(
             batch_size, -1, self.n_heads * self.d_v)  # [bz, seq_len, 400]
         #         output = self.fc(context)
-        return context  #self.layer_norm(output + residual)
+        return context  # self.layer_norm(output + residual)
 
 
 class WeightedLinear(torch.nn.Module):
@@ -112,13 +113,14 @@ class WeightedLinear(torch.nn.Module):
         nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
-        weight_softmax =  nn.Softmax(dim=-1)(self.weight)
+        weight_softmax = nn.Softmax(dim=-1)(self.weight)
         return F.linear(input, weight_softmax)
 
     def extra_repr(self) -> str:
         return 'in_features={}, out_features={}'.format(
             self.in_features, self.out_features
         )
+
 
 class TextEncoder(torch.nn.Module):
     def __init__(self,
@@ -129,13 +131,13 @@ class TextEncoder(torch.nn.Module):
                  dropout_rate,
                  enable_gpu=True):
         super(TextEncoder, self).__init__()
-        #self.word_embedding = word_embedding
+        # self.word_embedding = word_embedding
         self.bert_model = bert_model
         self.dropout_rate = dropout_rate
         self.multihead_attention = MultiHeadAttention(word_embedding_dim,
                                                       num_attention_heads, 20,
                                                       20, enable_gpu)
-        self.additive_attention = AdditiveAttention(num_attention_heads*20,
+        self.additive_attention = AdditiveAttention(num_attention_heads * 20,
                                                     query_vector_dim)
 
     def forward(self, text, mask=None):
@@ -150,7 +152,7 @@ class TextEncoder(torch.nn.Module):
         num_words = num_words // 3
         text_ids = torch.narrow(text, 1, 0, num_words)
         text_type = torch.narrow(text, 1, num_words, num_words)
-        text_attmask = torch.narrow(text, 1, num_words*2, num_words)
+        text_attmask = torch.narrow(text, 1, num_words * 2, num_words)
         word_emb = self.bert_model(text_ids, text_type, text_attmask)[2][8]
         text_vector = F.dropout(word_emb,
                                 p=self.dropout_rate,
@@ -210,16 +212,14 @@ class NewsEncoder(torch.nn.Module):
 
         self.text_encoders = nn.ModuleDict({
             'title':
-            TextEncoder(bert_model,
-                        args.word_embedding_dim,
-                        args.num_attention_heads, args.news_query_vector_dim,
-                        args.drop_rate, args.enable_gpu)
+                TextEncoder(bert_model,
+                            args.word_embedding_dim,
+                            args.num_attention_heads, args.news_query_vector_dim,
+                            args.drop_rate, args.enable_gpu)
         })
-    
-        self.newsname=[name for name in set(args.news_attributes) & set(text_encoders_candidates)]
 
+        self.newsname = [name for name in set(args.news_attributes) & set(text_encoders_candidates)]
 
-            
         name2num = {
             "category": category_dict_size + 1,
             "domain": domain_dict_size + 1,
@@ -227,13 +227,13 @@ class NewsEncoder(torch.nn.Module):
         }
         element_encoders_candidates = ['category', 'domain', 'subcategory']
         self.element_encoders = nn.ModuleDict({
-            name: ElementEncoder(name2num[name], 
-                                args.num_attention_heads * 20,
+            name: ElementEncoder(name2num[name],
+                                 args.num_attention_heads * 20,
                                  args.enable_gpu)
             for name in (set(args.news_attributes)
                          & set(element_encoders_candidates))
         })
-        #if len(args.news_attributes) > 1:
+        # if len(args.news_attributes) > 1:
         #    self.final_attention = AdditiveAttention(
         #        args.num_attention_heads * 20, args.news_query_vector_dim)
 
@@ -242,8 +242,8 @@ class NewsEncoder(torch.nn.Module):
 
         if args.use_pretrain_news_encoder:
             self.reduce_dim_linear.load_state_dict(
-                torch.load(os.path.join(args.pretrain_news_encoder_path, 
-                'reduce_dim_linear.pkl'))
+                torch.load(os.path.join(args.pretrain_news_encoder_path,
+                                        'reduce_dim_linear.pkl'))
             )
 
     def forward(self, news):
@@ -274,8 +274,8 @@ class NewsEncoder(torch.nn.Module):
             final_news_vector = torch.mean(
                 torch.stack(all_vectors, dim=1),
                 dim=1
-             )
-        
+            )
+
         # batch_size, news_dim
         final_news_vector = self.reduce_dim_linear(final_news_vector)
         return final_news_vector
@@ -293,25 +293,24 @@ class UserEncoder(torch.nn.Module):
         else:
             # self.news_padded_news_embedding = None
             self.pad_doc = None
-        
 
     def _process_news(self, vec, mask, pad_doc,
-                    additive_attention, use_mask=False, 
-                    use_padded_embedding=False):
+                      additive_attention, use_mask=False,
+                      use_padded_embedding=False):
         assert not (use_padded_embedding and use_mask), 'Conflicting config'
         if use_padded_embedding:
             # batch_size, maxlen, dim
             batch_size = vec.shape[0]
             padding_doc = pad_doc.expand(batch_size, self.args.news_dim).unsqueeze(1).expand( \
-                                         batch_size, self.args.user_log_length , self.args.news_dim)
+                batch_size, self.args.user_log_length, self.args.news_dim)
             # batch_size, maxlen, dim
-            vec = vec * mask.unsqueeze(2).expand(-1, -1, self.args.news_dim) + padding_doc * (1 - mask.unsqueeze(2).expand(-1, -1, self.args.news_dim))
+            vec = vec * mask.unsqueeze(2).expand(-1, -1, self.args.news_dim) + padding_doc * (
+                    1 - mask.unsqueeze(2).expand(-1, -1, self.args.news_dim))
         # batch_size, news_dim
         vec = additive_attention(vec,
                                  mask if use_mask else None)
         return vec
 
-    
     def forward(self, log_vec, log_mask):
         """
         Returns:
@@ -321,9 +320,8 @@ class UserEncoder(torch.nn.Module):
         log_vec = self._process_news(log_vec, log_mask, self.pad_doc,
                                      self.news_additive_attention, self.args.user_log_mask,
                                      self.args.use_padded_news_embedding)
-        
-        user_log_vecs = log_vec
 
+        user_log_vecs = log_vec
 
         return user_log_vecs
 
@@ -333,6 +331,7 @@ class ModelBert(torch.nn.Module):
     UniUM network.
     Input 1 + K candidate news and a list of user clicked news, produce the click probability.
     """
+
     def __init__(self,
                  args,
                  bert_model,
@@ -342,10 +341,9 @@ class ModelBert(torch.nn.Module):
         super(ModelBert, self).__init__()
         self.args = args
 
-
         self.news_encoder = NewsEncoder(args,
                                         bert_model,
-                                        category_dict_size, 
+                                        category_dict_size,
                                         domain_dict_size,
                                         subcategory_dict_size)
         self.user_encoder = UserEncoder(args)
@@ -383,4 +381,3 @@ class ModelBert(torch.nn.Module):
             return loss, score
         else:
             return score
-

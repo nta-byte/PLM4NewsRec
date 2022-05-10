@@ -10,6 +10,7 @@ import torch
 from torch.utils.data import IterableDataset
 from streaming import StreamSampler, StreamSamplerTest
 import utils
+import tensorflow as tf
 
 
 def news_sample(news, ratio):
@@ -72,14 +73,14 @@ class DataLoaderTrain(IterableDataset):
         self.sampler.__iter__()
 
     def trans_to_nindex(self, nids):
-        return [self.news_index[i] if i in self.news_index else 0 for i in nids]
+        return [self.news_index[i.ref()] if i.ref() in self.news_index else 0 for i in nids]
 
     def pad_to_fix_len(self, x, fix_length, padding_front=True, padding_value=0):
         if padding_front:
-            pad_x = [padding_value] * (fix_length-len(x)) + x[-fix_length:]
-            mask = [0] * (fix_length-len(x)) + [1] * min(fix_length, len(x))
+            pad_x = [padding_value] * (fix_length - len(x)) + x[-fix_length:]
+            mask = [0] * (fix_length - len(x)) + [1] * min(fix_length, len(x))
         else:
-            pad_x = x[:fix_length] + [padding_value]*(fix_length-len(x))
+            pad_x = x[:fix_length] + [padding_value] * (fix_length - len(x))
             mask = [1] * min(fix_length, len(x)) + [0] * (len(x) - fix_length)
         return pad_x, mask
 
@@ -133,25 +134,24 @@ class DataLoaderTrain(IterableDataset):
 
     def _process(self, batch):
         batch_size = len(batch)
-        #print(batch)
+        # print(batch)
         batch_poss, batch = batch
-        batch_poss = [x.decode(encoding="utf-8") for x in batch_poss]
-        batch = [x.decode(encoding="utf-8").split("\t") for x in batch]
+        batch_poss = [x for x in batch_poss]
+        batch = [tf.strings.split(x, sep='\t') for x in batch]
         label = 0
         user_feature_batch, log_mask_batch, news_feature_batch, label_batch = [], [], [], []
 
         for poss, line in zip(batch_poss, batch):
-            click_docs = line[3].split()
-            
+            click_docs = tf.strings.split(line[3])
 
             click_docs, log_mask = self.pad_to_fix_len(self.trans_to_nindex(click_docs),
-                                             self.user_log_length)
+                                                       self.user_log_length)
 
             user_feature = self.news_combined[click_docs]
 
-            sess_news = [i.split('-') for i in line[4].split()]
+            sess_news = [tf.strings.split(i, sep='-') for i in tf.strings.split(line[4])]
             sess_neg = [i[0] for i in sess_news if i[-1] == '0']
-        
+
             poss = self.trans_to_nindex([poss])
             sess_neg = self.trans_to_nindex(sess_neg)
 
@@ -170,15 +170,15 @@ class DataLoaderTrain(IterableDataset):
             label_batch.append(label)
 
         if self.enable_gpu:
-            user_feature_batch = torch.LongTensor(user_feature_batch).cuda()
-            log_mask_batch = torch.FloatTensor(log_mask_batch).cuda()
-            news_feature_batch = torch.LongTensor(news_feature_batch).cuda()
-            label_batch = torch.LongTensor(label_batch).cuda()
+            user_feature_batch = torch.LongTensor(np.array(user_feature_batch)).cuda()
+            log_mask_batch = torch.FloatTensor(np.array(log_mask_batch)).cuda()
+            news_feature_batch = torch.LongTensor(np.array(news_feature_batch)).cuda()
+            label_batch = torch.LongTensor(np.array(label_batch)).cuda()
         else:
-            user_feature_batch = torch.LongTensor(user_feature_batch)
-            log_mask_batch = torch.FloatTensor(log_mask_batch)
-            news_feature_batch = torch.LongTensor(news_feature_batch)
-            label_batch = torch.LongTensor(label_batch)
+            user_feature_batch = torch.LongTensor(np.array(user_feature_batch))
+            log_mask_batch = torch.FloatTensor(np.array(log_mask_batch))
+            news_feature_batch = torch.LongTensor(np.array(news_feature_batch))
+            label_batch = torch.LongTensor(np.array(label_batch))
 
         return user_feature_batch, log_mask_batch, news_feature_batch, label_batch
 
@@ -305,8 +305,8 @@ class DataLoaderTest(DataLoaderTrain):
         for line in batch:
             click_docs = line[3].split()
 
-            click_docs, log_mask  = self.pad_to_fix_len(self.trans_to_nindex(click_docs),
-                                             self.user_log_length)
+            click_docs, log_mask = self.pad_to_fix_len(self.trans_to_nindex(click_docs),
+                                                       self.user_log_length)
             user_feature = self.news_scoring[click_docs]
 
             sample_news = self.trans_to_nindex([i.split('-')[0] for i in line[4].split()])
@@ -326,11 +326,9 @@ class DataLoaderTest(DataLoaderTrain):
         if self.enable_gpu:
             user_feature_batch = torch.FloatTensor(user_feature_batch).cuda()
             log_mask_batch = torch.FloatTensor(log_mask_batch).cuda()
-            
+
         else:
             user_feature_batch = torch.FloatTensor(user_feature_batch)
             log_mask_batch = torch.FloatTensor(log_mask_batch)
 
-
         return user_feature_batch, log_mask_batch, news_feature_batch, news_bias_batch, label_batch
-

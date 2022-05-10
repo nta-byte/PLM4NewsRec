@@ -18,98 +18,100 @@ from parameters import parse_args
 
 from transformers import AutoTokenizer, AutoModel, AutoConfig
 
-finetuneset={
-'encoder.layer.6.attention.self.query.weight',
-'encoder.layer.6.attention.self.query.bias',
-'encoder.layer.6.attention.self.key.weight',
-'encoder.layer.6.attention.self.key.bias',
-'encoder.layer.6.attention.self.value.weight',
-'encoder.layer.6.attention.self.value.bias',
-'encoder.layer.6.attention.output.dense.weight',
-'encoder.layer.6.attention.output.dense.bias',
-'encoder.layer.6.attention.output.LayerNorm.weight',
-'encoder.layer.6.attention.output.LayerNorm.bias',
-'encoder.layer.6.intermediate.dense.weight',
-'encoder.layer.6.intermediate.dense.bias',
-'encoder.layer.6.output.dense.weight',
-'encoder.layer.6.output.dense.bias',
-'encoder.layer.6.output.LayerNorm.weight',
-'encoder.layer.6.output.LayerNorm.bias',
-'encoder.layer.7.attention.self.query.weight',
-'encoder.layer.7.attention.self.query.bias',
-'encoder.layer.7.attention.self.key.weight',
-'encoder.layer.7.attention.self.key.bias',
-'encoder.layer.7.attention.self.value.weight',
-'encoder.layer.7.attention.self.value.bias',
-'encoder.layer.7.attention.output.dense.weight',
-'encoder.layer.7.attention.output.dense.bias',
-'encoder.layer.7.attention.output.LayerNorm.weight',
-'encoder.layer.7.attention.output.LayerNorm.bias',
-'encoder.layer.7.intermediate.dense.weight',
-'encoder.layer.7.intermediate.dense.bias',
-'encoder.layer.7.output.dense.weight',
-'encoder.layer.7.output.dense.bias',
-'encoder.layer.7.output.LayerNorm.weight',
-'encoder.layer.7.output.LayerNorm.bias',
-'pooler.dense.weight',
-'pooler.dense.bias',
-'rel_pos_bias.weight',
-'classifier.weight',
-'classifier.bias'}
+torch.cuda.empty_cache()
+finetuneset = {
+    'encoder.layer.6.attention.self.query.weight',
+    'encoder.layer.6.attention.self.query.bias',
+    'encoder.layer.6.attention.self.key.weight',
+    'encoder.layer.6.attention.self.key.bias',
+    'encoder.layer.6.attention.self.value.weight',
+    'encoder.layer.6.attention.self.value.bias',
+    'encoder.layer.6.attention.output.dense.weight',
+    'encoder.layer.6.attention.output.dense.bias',
+    'encoder.layer.6.attention.output.LayerNorm.weight',
+    'encoder.layer.6.attention.output.LayerNorm.bias',
+    'encoder.layer.6.intermediate.dense.weight',
+    'encoder.layer.6.intermediate.dense.bias',
+    'encoder.layer.6.output.dense.weight',
+    'encoder.layer.6.output.dense.bias',
+    'encoder.layer.6.output.LayerNorm.weight',
+    'encoder.layer.6.output.LayerNorm.bias',
+    'encoder.layer.7.attention.self.query.weight',
+    'encoder.layer.7.attention.self.query.bias',
+    'encoder.layer.7.attention.self.key.weight',
+    'encoder.layer.7.attention.self.key.bias',
+    'encoder.layer.7.attention.self.value.weight',
+    'encoder.layer.7.attention.self.value.bias',
+    'encoder.layer.7.attention.output.dense.weight',
+    'encoder.layer.7.attention.output.dense.bias',
+    'encoder.layer.7.attention.output.LayerNorm.weight',
+    'encoder.layer.7.attention.output.LayerNorm.bias',
+    'encoder.layer.7.intermediate.dense.weight',
+    'encoder.layer.7.intermediate.dense.bias',
+    'encoder.layer.7.output.dense.weight',
+    'encoder.layer.7.output.dense.bias',
+    'encoder.layer.7.output.LayerNorm.weight',
+    'encoder.layer.7.output.LayerNorm.bias',
+    'pooler.dense.weight',
+    'pooler.dense.bias',
+    'rel_pos_bias.weight',
+    'classifier.weight',
+    'classifier.bias'}
+
+
 def train(args):
     # Only support title Turing now
-    assert args.enable_hvd  # TODO
+    # assert args.enable_hvd  # TODO
     if args.enable_hvd:
         import horovod.torch as hvd
 
     if args.load_ckpt_name is not None:
-        #TODO: choose ckpt_path
+        # TODO: choose ckpt_path
         ckpt_path = utils.get_checkpoint(args.model_dir, args.load_ckpt_name)
     else:
         ckpt_path = utils.latest_checkpoint(args.model_dir)
 
-
     hvd_size, hvd_rank, hvd_local_rank = utils.init_hvd_cuda(
         args.enable_hvd, args.enable_gpu)
-
+    print('2222')
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     config = AutoConfig.from_pretrained("bert-base-uncased", output_hidden_states=True)
-    bert_model = AutoModel.from_pretrained("bert-base-uncased",config=config)
-    
-    #bert_model.load_state_dict(torch.load('../bert_encoder_part.pkl'))
+    bert_model = AutoModel.from_pretrained("bert-base-uncased", config=config)
+
+    # bert_model.load_state_dict(torch.load('../bert_encoder_part.pkl'))
     # freeze parameters
-    for name,param in bert_model.named_parameters():
+    for name, param in bert_model.named_parameters():
         if name not in finetuneset:
             param.requires_grad = False
-    
+    print('start read_news_bert')
     news, news_index, category_dict, domain_dict, subcategory_dict = read_news_bert(
         os.path.join(args.root_data_dir,
-                    f'{args.dataset}/{args.train_dir}/news.tsv'), 
+                     f'{args.dataset}/{args.train_dir}/news.tsv'),
         args,
         tokenizer
     )
-    
+    print('start get_doc_input_bert')
     news_title, news_title_type, news_title_attmask, \
     news_abstract, news_abstract_type, news_abstract_attmask, \
     news_body, news_body_type, news_body_attmask, \
     news_category, news_domain, news_subcategory = get_doc_input_bert(
         news, news_index, category_dict, domain_dict, subcategory_dict, args)
-    
+
     news_combined = np.concatenate([
         x for x in
-        [news_title, news_title_type, news_title_attmask, \
-            news_abstract, news_abstract_type, news_abstract_attmask, \
-            news_body, news_body_type, news_body_attmask, \
-            news_category, news_domain, news_subcategory]
+        [news_title, news_title_type, news_title_attmask,
+         news_abstract, news_abstract_type, news_abstract_attmask,
+         news_body, news_body_type, news_body_attmask,
+         news_category, news_domain, news_subcategory]
         if x is not None], axis=1)
-    
+
     model = ModelBert(args, bert_model, len(category_dict), len(domain_dict), len(subcategory_dict))
     word_dict = None
-    
+
     if args.enable_gpu:
         model = model.cuda()
 
-    lr_scaler = hvd.local_size()
+    # lr_scaler = hvd.local_size()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     if args.enable_hvd:
         hvd.broadcast_parameters(model.state_dict(), root_rank=0)
@@ -121,13 +123,11 @@ def train(args):
             compression=compression,
             op=hvd.Average)
 
-
     dataloader = DataLoaderTrain(
         news_index=news_index,
         news_combined=news_combined,
         word_dict=word_dict,
-        data_dir=os.path.join(args.root_data_dir,
-                            f'{args.market}/{args.train_dir}'),
+        data_dir=os.path.join(args.root_data_dir, f'{args.dataset}/{args.train_dir}'),
         filename_pat=args.filename_pat,
         args=args,
         world_size=hvd_size,
@@ -163,12 +163,12 @@ def train(args):
                 logging.info(
                     '[{}] Ed: {}, train_loss: {:.5f}, acc: {:.5f}'.format(
                         hvd_rank, cnt * args.batch_size, loss.data / cnt,
-                        accuary / cnt))
-            
+                                  accuary / cnt))
+
             # save model minibatch
-            print(hvd_rank,cnt,args.save_steps,cnt%args.save_steps)
+            # print(hvd_rank, cnt, args.save_steps, cnt % args.save_steps)
             if hvd_rank == 0 and cnt % args.save_steps == 0:
-                ckpt_path = os.path.join(args.model_dir, f'epoch-{ep+1}-{cnt}.pt')
+                ckpt_path = os.path.join(args.model_dir, f'epoch-{ep + 1}-{cnt}.pt')
                 torch.save(
                     {
                         'model_state_dict': model.state_dict(),
@@ -184,7 +184,7 @@ def train(args):
 
         # save model last of epoch
         if hvd_rank == 0:
-            ckpt_path = os.path.join(args.model_dir, f'epoch-{ep+1}.pt')
+            ckpt_path = os.path.join(args.model_dir, f'epoch-{ep + 1}.pt')
             torch.save(
                 {
                     'model_state_dict': model.state_dict(),
@@ -199,7 +199,6 @@ def train(args):
 
 
 def test(args):
-
     if args.enable_hvd:
         import horovod.torch as hvd
 
@@ -207,7 +206,7 @@ def test(args):
         args.enable_hvd, args.enable_gpu)
 
     if args.load_ckpt_name is not None:
-        #TODO: choose ckpt_path
+        # TODO: choose ckpt_path
         ckpt_path = utils.get_checkpoint(args.model_dir, args.load_ckpt_name)
     else:
         ckpt_path = utils.latest_checkpoint(args.model_dir)
@@ -225,9 +224,9 @@ def test(args):
     domain_dict = checkpoint['domain_dict']
     tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
     config = AutoConfig.from_pretrained("bert-base-uncased", output_hidden_states=True)
-    bert_model = AutoModel.from_pretrained("bert-base-uncased",config=config)
+    bert_model = AutoModel.from_pretrained("bert-base-uncased", config=config)
     model = ModelBert(args, bert_model, len(category_dict), len(domain_dict), len(subcategory_dict))
-    
+
     if args.enable_gpu:
         model.cuda()
 
@@ -242,7 +241,7 @@ def test(args):
 
     news, news_index, category_dict, domain_dict, subcategory_dict = read_news_bert(
         os.path.join(args.root_data_dir,
-                    f'{args.market}/{args.test_dir}/news.tsv'), 
+                     f'{args.dataset}/{args.test_dir}/news.tsv'),
         args,
         tokenizer
     )
@@ -254,13 +253,12 @@ def test(args):
         news, news_index, category_dict, domain_dict, subcategory_dict, args)
 
     news_combined = np.concatenate([
-    x for x in
-    [news_title, news_title_type, news_title_attmask, \
-    news_abstract, news_abstract_type, news_abstract_attmask, \
-    news_body, news_body_type, news_body_attmask, \
-    news_category, news_domain, news_subcategory]
-    if x is not None], axis=1)
-
+        x for x in
+        [news_title, news_title_type, news_title_attmask,
+         news_abstract, news_abstract_type, news_abstract_attmask,
+         news_body, news_body_type, news_body_attmask,
+         news_category, news_domain, news_subcategory]
+        if x is not None], axis=1)
 
     class NewsDataset(Dataset):
         def __init__(self, data):
@@ -273,14 +271,14 @@ def test(args):
             return self.data.shape[0]
 
     def news_collate_fn(arr):
-        arr = torch.LongTensor(arr)
+        arr = torch.LongTensor(np.array(arr))
         return arr
 
     news_dataset = NewsDataset(news_combined)
     news_dataloader = DataLoader(news_dataset,
-                                batch_size=args.batch_size * 4,
-                                num_workers=args.num_workers,
-                                collate_fn=news_collate_fn)
+                                 batch_size=args.batch_size,
+                                 num_workers=args.num_workers,
+                                 collate_fn=news_collate_fn)
 
     news_scoring = []
     with torch.no_grad():
@@ -290,19 +288,17 @@ def test(args):
             news_vec = news_vec.to(torch.device("cpu")).detach().numpy()
             news_scoring.extend(news_vec)
 
-
     news_scoring = np.array(news_scoring)
 
     logging.info("news scoring num: {}".format(news_scoring.shape[0]))
- 
 
     dataloader = DataLoaderTest(
         news_index=news_index,
         news_scoring=news_scoring,
         word_dict=word_dict,
-        news_bias_scoring= None,
+        news_bias_scoring=None,
         data_dir=os.path.join(args.root_data_dir,
-                            f'{args.market}/{args.test_dir}'),
+                              f'{args.dataset}/{args.test_dir}'),
         filename_pat=args.filename_pat,
         args=args,
         world_size=hvd_size,
@@ -322,13 +318,13 @@ def test(args):
 
     def print_metrics(hvd_local_rank, cnt, x):
         logging.info("[{}] Ed: {}: {}".format(hvd_local_rank, cnt, \
-            '\t'.join(["{:0.2f}".format(i * 100) for i in x])))
+                                              '\t'.join(["{:0.2f}".format(i * 100) for i in x])))
 
     def get_mean(arr):
         return [np.array(i).mean() for i in arr]
 
-    #for cnt, (log_vecs, log_mask, news_vecs, news_bias, labels) in enumerate(dataloader):
-    
+    # for cnt, (log_vecs, log_mask, news_vecs, news_bias, labels) in enumerate(dataloader):
+
     for cnt, (log_vecs, log_mask, news_vecs, news_bias, labels) in enumerate(dataloader):
         his_lens = torch.sum(log_mask, dim=-1).to(torch.device("cpu")).detach().numpy()
 
@@ -340,7 +336,7 @@ def test(args):
 
         for index, user_vec, news_vec, bias, label, his_len in zip(
                 range(len(labels)), user_vecs, news_vecs, news_bias, labels, his_lens):
-                
+
             if label.mean() == 0 or label.mean() == 1:
                 continue
 
@@ -348,28 +344,26 @@ def test(args):
                 news_vec, user_vec
             )
 
-
-            
             auc = roc_auc_score(label, score)
             mrr = mrr_score(label, score)
             ndcg5 = ndcg_score(label, score, k=5)
             ndcg10 = ndcg_score(label, score, k=10)
-
 
             AUC.append(auc)
             MRR.append(mrr)
             nDCG5.append(ndcg5)
             nDCG10.append(ndcg10)
 
-        if cnt % args.log_steps == 0:
-
-            print_metrics(hvd_rank, cnt * args.batch_size, get_mean([AUC, MRR, nDCG5,  nDCG10]))
+        # if cnt % args.log_steps == 0:
+        print_metrics(hvd_rank, cnt * args.batch_size, get_mean([AUC, MRR, nDCG5, nDCG10]))
 
     # stop scoring
     dataloader.join()
 
     for i in range(2):
-        print_metrics(hvd_rank, cnt * args.batch_size, get_mean([AUC, MRR, nDCG5,  nDCG10]))
+        print_metrics(hvd_rank, cnt * args.batch_size, get_mean([AUC, MRR, nDCG5, nDCG10]))
+
+
 if __name__ == "__main__":
     utils.setuplogger()
     args = parse_args()

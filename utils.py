@@ -14,6 +14,7 @@ def word_tokenize(sent):
     else:
         return []
 
+
 def str2bool(v):
     if isinstance(v, bool):
         return v
@@ -40,7 +41,8 @@ def init_hvd_cuda(enable_hvd=True, enable_gpu=True):
     hvd_local_rank = hvd.local_rank() if enable_hvd else 0
 
     if enable_gpu:
-        torch.cuda.set_device(hvd_local_rank)
+        # torch.cuda.set_device(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     return hvd_size, hvd_rank, hvd_local_rank
 
@@ -71,7 +73,7 @@ def acc(y_true, y_hat):
 def dcg_score(y_true, y_score, k=10):
     order = np.argsort(y_score)[::-1]
     y_true = np.take(y_true, order[:k])
-    gains = 2**y_true - 1
+    gains = 2 ** y_true - 1
     discounts = np.log2(np.arange(len(y_true)) + 2)
     return np.sum(gains / discounts)
 
@@ -113,7 +115,7 @@ def latest_checkpoint(directory):
     if not os.path.exists(directory):
         return None
     print(os.listdir(directory))
-    if len(os.listdir(directory))==0:
+    if len(os.listdir(directory)) == 0:
         return None
     all_checkpoints = {
         int(x.split('.')[-2].split('-')[-1]): x
@@ -123,6 +125,7 @@ def latest_checkpoint(directory):
         return None
     return os.path.join(directory,
                         all_checkpoints[max(all_checkpoints.keys())])
+
 
 def get_checkpoint(directory, ckpt_name):
     ckpt_path = os.path.join(directory, ckpt_name)

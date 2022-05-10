@@ -1,0 +1,279 @@
+{
+  "Điểm đến": [
+    "Đà Nẵng",
+    "Hội An",
+    "Hồ Chí Minh",
+    "Huế",
+    "Hạ Long",
+    "Cần Thơ",
+    "Quảng Bình",
+    "Hải Phòng",
+    "Hà Nam",
+    "Lạng Sơn",
+    "Tây Ninh",
+    "Hà Tĩnh",
+    "Thanh Hóa",
+    "Nghệ An",
+    "Phú Quốc",
+    "Nha Trang"
+  ],
+  "Địa điểm": {
+    "Vinpearl Luxury Nha Trang": {
+      "Chuỗi": "Luxury",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Luxury Đà Nẵng": {
+      "Chuỗi": "Luxury",
+      "Điểm đến": "Đà Nẵng"
+    },
+    "Vinpearl Luxury Landmark 81": {
+      "Chuỗi": "Luxury",
+      "Điểm đến": "Hồ Chí Minh"
+    },
+    "Vinpearl Resort & Spa Hạ Long": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Hạ Long"
+    },
+    "Vinpearl Resort & Spa Đà Nẵng": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Đà Nẵng"
+    },
+    "Vinpearl Resort & Spa Hội An": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Hội An"
+    },
+    "Vinpearl Resort & Golf Nam Hội An": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Hội An"
+    },
+    "Vinpearl Resort & Spa Phú Quốc": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Phú Quốc"
+    },
+    "VinHolidays 1 Phú Quốc": {
+      "Chuỗi": "Holidays",
+      "Điểm đến": "Phú Quốc"
+    },
+    "VinHolidays 2 Phú Quốc": {
+      "Chuỗi": "Holidays",
+      "Điểm đến": "Phú Quốc"
+    },
+    "VinOasis Phú Quốc": {
+      "Chuỗi": "Oasis",
+      "Điểm đến": "Phú Quốc"
+    },
+    "Vinpearl Resort & Spa Nha Trang Bay": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Resort & Spa Long Beach Nha Trang": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Resort Nha Trang": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Discovery Rockside Nha Trang": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Discovery Sealink Nha Trang": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Discovery Golflink Nha Trang": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Discovery Cửa Hội": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Hà Tĩnh"
+    },
+    "Vinpearl Discovery Hà Tĩnh": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Hà Tĩnh"
+    },
+    "Vinpearl Discovery Wonderworld Phú Quốc": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Phú Quốc"
+    },
+    "Vinpearl Discovery Coastalland Phú Quốc": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Phú Quốc"
+    },
+    "Vinpearl Discovery Greenhill Phú Quốc": {
+      "Chuỗi": "Discovery",
+      "Điểm đến": "Phú Quốc"
+    },
+    "Vinpearl Condotel Empire Nha Trang": {
+      "Chuỗi": "Condotel",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Condotel Beachfront Nha Trang": {
+      "Chuỗi": "Condotel",
+      "Điểm đến": "Nha Trang"
+    },
+    "Vinpearl Condotel Riverfront Đà Nẵng": {
+      "Chuỗi": "Condotel",
+      "Điểm đến": "Đà Nẵng"
+    },
+    "Vinpearl Condotel Phủ Lý": {
+      "Chuỗi": "Condotel",
+      "Điểm đến": "Hà Nam"
+    },
+    "Vinpearl Hotel Hà Tĩnh": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Hà Tĩnh"
+    },
+    "Vinpearl Hotel Cần Thơ": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Cần Thơ"
+    },
+    "Vinpearl Hotel Thanh Hóa": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Thanh Hóa"
+    },
+    "Vinpearl Hotel Quảng Bình": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Quảng Bình"
+    },
+    "Vinpearl Hotel Huế": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Huế"
+    },
+    "Vinpearl Hotel Lạng Sơn": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Lạng Sơn"
+    },
+    "Vinpearl Hotel Tây Ninh": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Tây Ninh"
+    },
+    "Vinpearl Hotel Imperia Hải Phòng": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Hải Phòng"
+    },
+    "Vinpearl Hotel Rivera Hải Phòng": {
+      "Chuỗi": "Hotel",
+      "Điểm đến": "Hải Phòng"
+    },
+    "Vinpearl Resort & Golf Phú Quốc": {
+      "Chuỗi": "Resort",
+      "Điểm đến": "Phú Quốc"
+    },
+    "VinHolidays Fiesta Phú Quốc": {
+      "Chuỗi": "Holidays",
+      "Điểm đến": "Phú Quốc"
+    }
+  },
+  "Loại sản phẩm": {
+    "Gói nghỉ dưỡng": {
+      "Similar word": [
+        "khách sạn",
+        "du lịch",
+        "phòng",
+        "deluxe",
+        "villa",
+        "biển",
+        "biệt thự",
+        "nghỉ"
+      ]
+    },
+    "VinWonders": {
+      "Similar word": [
+        "vui chơi"
+      ]
+    },
+    "Vận chuyển": {
+      "Similar word": []
+    },
+    "Vinpearl Golf": {
+      "Similar word": [
+        "Golf"
+      ]
+    },
+    "Ẩm thực": {
+      "Similar word": [
+        "buffet",
+        "ăn",
+        "uống",
+        "bữa"
+      ]
+    },
+    "Tour": {
+      "Similar word": []
+    },
+    "Vé tham quan": {
+      "Similar word": [
+        "Safari"
+      ]
+    },
+    "Spa": {
+      "Similar word": []
+    }
+  },
+  "Điểm khởi hành": [
+    "Hồ Chí Minh",
+    "Hà Nội",
+    "Đà Nẵng",
+    "Nha Trang",
+    "Kiên Giang",
+    "Hải Phòng",
+    "Nghệ An",
+    "Quảng Ninh",
+    "Vinh",
+    "Đà Lạt",
+    "Thanh Hóa"
+  ],
+  "Đối tượng phù hợp": [
+    "Cặp đôi",
+    "Gia đình",
+    "Nhóm bạn",
+    "Doanh nhân"
+  ],
+  "Ngành": {
+    "sao": {
+      "Similar word": [
+        "đỉnh cao",
+        "hấp dẫn",
+        "chuyên nghiệp",
+        "đẳng cấp",
+        "hấp dẫn"
+      ]
+    },
+    "tivi": {
+      "Similar word": [
+        "TV",
+        "bồn tắm",
+        "wifi"
+      ]
+    },
+    "di sản": {
+      "Similar word": [
+        "di tích"
+      ]
+    },
+    "Vinpearl": {},
+    "Vingroup": {
+      "Similar word": [
+        "Vinhomes",
+        "shophouse"
+      ]
+    }
+  },
+  "Thông tin": {
+    "thông tin": {
+      "Similar word": [
+        "thông báo",
+        "báo cáo"
+      ]
+    },
+    "cổ phần": {
+      "Similar word": [
+        "trái phiếu",
+        "chứng khoán"
+      ]
+    }
+  }
+}

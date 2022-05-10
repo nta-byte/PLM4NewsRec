@@ -13,11 +13,11 @@ def parse_args():
         "--root_data_dir",
         type=str,
         default=
-        "./",
+        "/home/data/anhnt/datasets/",
     )
     parser.add_argument("--dataset",
                         type=str,
-                        default='MIND')
+                        default='MINDlarge')
     parser.add_argument(
         "--train_dir",
         type=str,
@@ -26,18 +26,18 @@ def parse_args():
     parser.add_argument(
         "--test_dir",
         type=str,
-        default='test',
+        default='dev',
     )
-    parser.add_argument("--filename_pat", type=str, default="behaviors_*.tsv")
+    parser.add_argument("--filename_pat", type=str, default="behaviors.tsv")
     parser.add_argument("--model_dir", type=str, default='./model')
-    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--batch_size", type=int, default=16)
     parser.add_argument("--npratio", type=int, default=1)
     parser.add_argument("--enable_gpu", type=utils.str2bool, default=True)
-    parser.add_argument("--enable_hvd", type=utils.str2bool, default=True)
+    parser.add_argument("--enable_hvd", type=utils.str2bool, default=False)
     parser.add_argument("--shuffle_buffer_size", type=int, default=10000)
     parser.add_argument("--num_workers", type=int, default=4)
     parser.add_argument("--filter_num", type=int, default=0)
-    parser.add_argument("--log_steps", type=int, default=1000)
+    parser.add_argument("--log_steps", type=int, default=50)
 
     # model training
     parser.add_argument("--epochs", type=int, default=1)
@@ -50,7 +50,7 @@ def parse_args():
         choices=['title', 'abstract', 'body', 'category', 'domain', 'subcategory'])
     parser.add_argument("--process_uet", type=utils.str2bool, default=False)
     parser.add_argument("--process_bing", type=utils.str2bool, default=False)
-       
+
     parser.add_argument("--num_words_title", type=int, default=24)
     parser.add_argument("--num_words_abstract", type=int, default=50)
     parser.add_argument("--num_words_body", type=int, default=50)
@@ -117,12 +117,12 @@ def parse_args():
     # pretrain
     parser.add_argument("--use_pretrain_news_encoder", type=utils.str2bool, default=False)
     parser.add_argument("--pretrain_news_encoder_path", type=str, default=".")
-    
+
     # uet add method
     parser.add_argument(
-        "--uet_agg_method", 
-        type=str, 
-        default='attention', 
+        "--uet_agg_method",
+        type=str,
+        default='attention',
         choices=['sum', 'attention', 'weighted-sum'])
 
     # turing
